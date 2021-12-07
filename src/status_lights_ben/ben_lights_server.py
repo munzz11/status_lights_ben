@@ -39,35 +39,18 @@ states = ['OFF', 'OFF', 'OFF', 'OFF', 'OFF']
 colors = ['red', 'amber', 'white', 'green', 'b_red']
 color_bits = [1, 1, 1, 1, 1]
 
-def start_up(started: bool):
+def start_up():
     ########  Starting Up   ########
-    if started == False:
-        for j in range(3):
-            for i in range(5):
-                states[i] = 'ON'
-                time.sleep(.5)
-                if i < 4:
-                    states[i+1] = 'ON'
-                    time.sleep(.5)
-                if i > 0:
-                    states[i-1] = 'OFF'
-                    time.sleep(.5)
-    #################################
-    ######   Confirm Started   ######
-    if started == True:
-        for i in range(3):
-            states[0] == 'Single'
-            states[1] == 'Single'
-            states[2] == 'Single'
-            states[3] == 'Single'
-            states[4] == 'Single'
-        time.sleep(3)
-        for i in range(3):
-            states[0] == 'OFF'
-            states[1] == 'OFF'
-            states[2] == 'OFF'
-            states[3] == 'OFF'
-            states[4] == 'OFF'
+    for j in range(3):
+        for i in range(5):
+            states[i] = 'ON'
+            time.sleep(0.05)
+            if i < 4:
+                states[i+1] = 'ON'
+                time.sleep(0.05)
+            if i > 0:
+                states[i-1] = 'OFF'
+                time.sleep(0.05)
     #################################
         
 def get_bit_val():
@@ -92,16 +75,16 @@ def flash_loop():
 
 t1 = threading.Thread(target=flash_loop)
 t1.start()
-start_up(False)
+start_up()
 print('Starting Server')
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind('tcp://*:5555')
 print('Socket open')
-
-start_up(True)   
+ 
 while True:
+    states[1] = 'Double'
     update = socket.recv()
     print(update)
     # time.sleep(1)
