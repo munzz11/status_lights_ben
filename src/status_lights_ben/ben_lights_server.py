@@ -2,7 +2,8 @@
 
 import threading
 import time
-import libioplus as io
+import zmq
+# import libioplus as io
 import sys
 import random
 import rospy
@@ -34,7 +35,7 @@ flash_dict = {
     'Double Alt2': [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0]
 }
 #Lights current states
-#         Red   Amber White Green botton red
+#         Red    Amber  White  Green  BRed
 states = ['OFF', 'OFF', 'OFF', 'OFF', 'OFF']
 colors = ['red', 'amber', 'white', 'green', 'b_red']
 color_bits = [1, 1, 1, 1, 1]
@@ -49,8 +50,7 @@ def set_bits(color, state, loop_pos, j) :
     color_bits[j] = flash[loop_pos]
 
 def flash_loop():
-    
-    while 1:
+    while True:
         for i in range(24):
             time.sleep(0.25)
             for j in range(5):
@@ -63,32 +63,38 @@ def flash_loop():
 t1 = threading.Thread(target=flash_loop)
 
 t1.start()
+print('Starting Server')
 
-# stl = flash_dict.keys()
+#####   Start up indictor   #####
+for j in range(3):
+    for i in range(5):
+        states[i] = 'ON'
+        time.wait(.5)
+        if i < 4:
+            states[i+1] = 'ON'
+        time.wait(.5)
+        if i > 0:
+            states[i-1] = 'OFF'
+        time.wait(.5)
+#################################
 
-# while 1:
-#     for i in range(5):
-#         states[i] = random.choice(stl)
-#     time.sleep(5)
+context = zmq.Context()
+socket = context.socket(zmq.REP)
+socket.bind('tcp://*:5555')
+print('Socket open')
+while True:
+    update = socket.recv()
+    print(update)
+    # time.sleep(1)
+    socket.send(b"Ack")
 
-# for i in range(5):
-#     if i%2 == 0: 
-#         states[i] = 'Single Alt1'
-
-# for i in range(5):
-#     if i%2 == 1: 
-#         states[i] = 'Single Alt2'
-        
-
-while 1:
-
-    if rosgraph.is_master_online():
-        print('ROS MASTER CONNECTED')
-        states[4] = 'OFF'
-        states[1] = 'ON'
-        rospy.init_node('ben_lights_node')
-        rospy.spin()
-    else:
-        print('ROS MASTER OFFLINE')
-        states[4] = 'Double'
-    time.sleep(2)
+    # if rosgraph.is_master_online():
+    #     print('ROS MASTER CONNECTED')
+    #     states[4] = 'OFF'
+    #     states[1] = 'ON'
+    #     rospy.init_node('ben_lights_node')
+    #     rospy.spin()
+    # else:
+    #     print('ROS MASTER OFFLINE')
+    #     states[4] = 'Double'
+    # time.sleep(2)
