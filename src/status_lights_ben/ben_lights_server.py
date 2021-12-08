@@ -45,13 +45,13 @@ def start_up(started: bool):
         for j in range(3):
             for i in range(5):
                 states[i] = 'ON'
-                time.wait(.5)
+                time.sleep(.5)
                 if i < 4:
                     states[i+1] = 'ON'
-                time.wait(.5)
+                    time.sleep(.5)
                 if i > 0:
                     states[i-1] = 'OFF'
-                time.wait(.5)
+                    time.sleep(.5)
     #################################
     ######   Confirm Started   ######
     if started == True:
