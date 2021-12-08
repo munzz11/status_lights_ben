@@ -12,12 +12,11 @@ import rosgraph
 # Possible light states:
 # - On                          - The light is on 
 # - Off                         - The light is off
-# - Single                      - The light flashes once then pauses for 1 sec
-# - Double                      - The light flashes twice then pauses for 1 sec
-# - Single Slow                 - The light flashes once then pauses for 3 sec
-# - Double Slow                 - The light flashes twice then pauses for 3 sec
-# - Single Super Slow           - The light flashes once then pauses for 5 sec
-# - Double Super Slow           - The light flashes twice then pauses for 5 sec
+# - Single                      - The light flashes alternating on off .5 sec
+# - Double                      - The light flashes twice then pauses for 1.5 sec
+# - Single Slow                 - The light flashes once then pauses for 2.5 sec
+# - Single Super Slow           - The light flashes once then pauses for 5.5 sec
+# - Double Super Slow           - The light flashes twice then pauses for 10.5 sec
 # - Single Alternating          - The light flashes once, alternating with another light
 # - Double Alternating          - The light flashes twice, then alternates with another light
 
@@ -40,6 +39,37 @@ states = ['OFF', 'OFF', 'OFF', 'OFF', 'OFF']
 colors = ['red', 'amber', 'white', 'green', 'b_red']
 color_bits = [1, 1, 1, 1, 1]
 
+def start_up(started: bool):
+    ########  Starting Up   ########
+    if started == False:
+        for j in range(3):
+            for i in range(5):
+                states[i] = 'ON'
+                time.wait(.5)
+                if i < 4:
+                    states[i+1] = 'ON'
+                time.wait(.5)
+                if i > 0:
+                    states[i-1] = 'OFF'
+                time.wait(.5)
+    #################################
+    ######   Confirm Started   ######
+    if started == True:
+        for i in range(3):
+            states[0] == 'Single'
+            states[1] == 'Single'
+            states[2] == 'Single'
+            states[3] == 'Single'
+            states[4] == 'Single'
+        time.sleep(3)
+        for i in range(3):
+            states[0] == 'OFF'
+            states[1] == 'OFF'
+            states[2] == 'OFF'
+            states[3] == 'OFF'
+            states[4] == 'OFF'
+    #################################
+        
 def get_bit_val():
     value = str('000') + ''.join(str(e) for e in color_bits)
     val = int(value, 2)
@@ -61,27 +91,16 @@ def flash_loop():
             
 
 t1 = threading.Thread(target=flash_loop)
-
 t1.start()
+start_up(False)
 print('Starting Server')
-
-#####   Start up indictor   #####
-for j in range(3):
-    for i in range(5):
-        states[i] = 'ON'
-        time.wait(.5)
-        if i < 4:
-            states[i+1] = 'ON'
-        time.wait(.5)
-        if i > 0:
-            states[i-1] = 'OFF'
-        time.wait(.5)
-#################################
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind('tcp://*:5555')
 print('Socket open')
+
+start_up(True)   
 while True:
     update = socket.recv()
     print(update)
