@@ -3,7 +3,7 @@
 import threading
 import time
 import zmq
-# import libioplus as io
+import libioplus as io
 import sys
 import random
 import rospy
