@@ -8,6 +8,7 @@ import sys
 import random
 import rospy
 import rosgraph
+import re
 
 # Possible light states:
 # - On                          - The light is on 
@@ -83,20 +84,70 @@ socket = context.socket(zmq.REP)
 socket.bind('tcp://*:5555')
 print('Socket open')
  
-while True:
-    states[1] = 'Double'
-    update = socket.recv()
-    print(update)
-    # time.sleep(1)
-    socket.send(b"Ack")
+####   Systems to Monitor   ####      id:    (T/F denoted by: [system_id],T or [system_id],F
+master_power: bool = False            #MP 
+payload_power: bool = False           #PP
+vp_scm_running: bool = False          #VP
+Ros_Core_Up: bool = False             #ROS            Can I connected to the roscore on mystique? (192.168.100.112)
+engine_running: bool = False          #ER
+valid_gps_fix: bool = False           #GPS
+joystick_controll: bool = False       #JC
+e_stop_active: bool = False           #ES
+radio_link_to_op: bool = False        #RL
+################################
 
-    # if rosgraph.is_master_online():
-    #     print('ROS MASTER CONNECTED')
-    #     states[4] = 'OFF'
-    #     states[1] = 'ON'
-    #     rospy.init_node('ben_lights_node')
-    #     rospy.spin()
-    # else:
-    #     print('ROS MASTER OFFLINE')
-    #     states[4] = 'Double'
-    # time.sleep(2)
+while True:
+    update = socket.recv()
+    socket.send(b"Ack")
+    update = (update.decode("utf-8")).split(',')
+    id = update[0]
+    status = update[1]
+    print(id + ' connection status: ' + status)
+    
+    if id == 'MP':
+        if status == 'T':
+            master_power == True
+        elif status == 'F':
+            master_power == False
+    if id == 'PP':
+        if status == 'T':
+            payload_power== True
+        elif status == 'F':
+            payload_power== False
+    if id == 'VP':
+        if status == 'T':
+            vp_scm_running == True
+        elif status == 'F':
+            vp_scm_running == False
+    if id == 'ROS':
+        if status == 'T':
+            Ros_Core_Up == True
+        elif status == 'F':
+            Ros_Core_Up == False
+    if id == 'ER':
+        if status == 'T':
+            engine_running == True
+        elif status == 'F':
+            engine_running == False
+    if id == 'GPS':
+        if status == 'T':
+            valid_gps_fix == True
+        elif status == 'F':
+            valid_gps_fix == False
+    if id == 'JC':
+        if status == 'T':
+            joystick_controll == True
+        elif status == 'F':
+            joystick_controll == False
+    if id == 'ES':
+        if status == 'T':
+            e_stop_active == True
+        elif status == 'F':
+            e_stop_active == False
+    if id == 'RL':
+        if status == 'T':
+           radio_link_to_op == True
+        elif status == 'F':
+           radio_link_to_op == False
+
+    #TODO: Define state combos and corresponding lighting here  
